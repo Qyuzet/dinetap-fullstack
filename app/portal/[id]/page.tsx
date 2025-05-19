@@ -51,6 +51,7 @@ import { OrderItem, PaymentMethod } from "@/models/Order";
 import { getPortalData } from "./page-server";
 import { createOrder, getOrderById } from "@/app/actions/client-actions";
 import { useToast } from "@/components/ui/use-toast";
+import { ChatAssistant } from "@/components/portal/chat-assistant";
 
 // Default restaurant data (will be replaced with real data)
 const defaultRestaurant = {
@@ -1404,6 +1405,8 @@ export default function PortalPage() {
           )}
         </DialogContent>
       </Dialog>
+      {/* AI Chat Assistant */}
+      <ChatAssistant portalId={id as string} menuItems={menuItems} />
     </div>
   );
 }
