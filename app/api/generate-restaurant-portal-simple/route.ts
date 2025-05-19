@@ -12,14 +12,50 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { restaurantName, websiteUrl } = body;
 
-    if (!restaurantName) {
-      return NextResponse.json(
-        { error: "Restaurant name is required" },
-        { status: 400 }
-      );
+    // Log request details
+    console.log(`API Request - generate-restaurant-portal-simple:`, {
+      restaurantName,
+      websiteUrl,
+      environment: process.env.NODE_ENV || "unknown",
+    });
+
+    // Validate restaurant name
+    let validRestaurantName = restaurantName;
+    if (!validRestaurantName) {
+      // Try to extract from website URL if provided
+      if (websiteUrl) {
+        try {
+          const urlObj = new URL(websiteUrl);
+          const hostname = urlObj.hostname;
+          // Remove www. and .com/.net/etc
+          validRestaurantName = hostname
+            .replace(/^www\./i, "")
+            .replace(
+              /\.(com|net|org|co|io|restaurant|food|menu|cafe|bar|pub|bistro).*$/i,
+              ""
+            )
+            .split(".")
+            .join(" ")
+            .split("-")
+            .join(" ")
+            .split("_")
+            .join(" ");
+
+          // Capitalize first letter of each word
+          validRestaurantName = validRestaurantName
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        } catch (urlError) {
+          console.error("Error extracting restaurant name from URL:", urlError);
+          validRestaurantName = "Restaurant";
+        }
+      } else {
+        validRestaurantName = "Restaurant";
+      }
     }
 
-    console.log(`Generating portal for restaurant: ${restaurantName}`);
+    console.log(`Generating portal for restaurant: ${validRestaurantName}`);
 
     // Get the Gemini model
     const model = genAI.getGenerativeModel({
@@ -28,7 +64,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare the prompt
     const prompt = `
-Generate a restaurant portal design and menu for a restaurant called "${restaurantName}".
+Generate a restaurant portal design and menu for a restaurant called "${validRestaurantName}".
 ${websiteUrl ? `The restaurant's website is: ${websiteUrl}` : ""}
 
 Please provide the following:
@@ -66,17 +102,17 @@ Format your response as JSON with the following structure:
       if (!jsonMatch) {
         throw new Error("Could not extract JSON from response");
       }
-      
+
       const jsonStr = jsonMatch[0];
       const data = JSON.parse(jsonStr);
-      
+
       return NextResponse.json({
         success: true,
-        data
+        data,
       });
     } catch (jsonError) {
       console.error("Error parsing AI response as JSON:", jsonError);
-      
+
       // Return a fallback response
       return NextResponse.json({
         success: true,
@@ -85,37 +121,39 @@ Format your response as JSON with the following structure:
           colors: {
             primary: "#3B82F6",
             secondary: "#1E40AF",
-            accent: "#DBEAFE"
+            accent: "#DBEAFE",
           },
           menuItems: [
             {
               name: "House Salad",
               description: "Fresh mixed greens with house dressing",
               price: 8.99,
-              category: "Appetizers"
+              category: "Appetizers",
             },
             {
               name: "Signature Pasta",
               description: "Handmade pasta with chef's special sauce",
               price: 16.99,
-              category: "Main Courses"
+              category: "Main Courses",
             },
             {
               name: "Chocolate Dessert",
               description: "Rich chocolate dessert with vanilla ice cream",
               price: 7.99,
-              category: "Desserts"
-            }
-          ]
-        }
+              category: "Desserts",
+            },
+          ],
+        },
       });
     }
   } catch (error) {
     console.error("Error generating restaurant portal:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: "Failed to generate restaurant portal: " + (error.message || "Unknown error") 
+      {
+        success: false,
+        error:
+          "Failed to generate restaurant portal: " +
+          (error.message || "Unknown error"),
       },
       { status: 500 }
     );

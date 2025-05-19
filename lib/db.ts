@@ -21,6 +21,13 @@ if (!uri) {
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
+// MongoDB connection options with shorter timeouts for Vercel
+const options = {
+  serverSelectionTimeoutMS: 10000, // Reduce from default 30000ms to 10000ms
+  connectTimeoutMS: 10000, // Reduce connection timeout
+  socketTimeoutMS: 20000, // Reduce socket timeout
+};
+
 // Check if we're in development mode
 if (process.env.NODE_ENV === "development") {
   // In development mode, use a global variable so that the value
@@ -30,13 +37,13 @@ if (process.env.NODE_ENV === "development") {
   };
 
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri);
+    client = new MongoClient(uri, options);
     globalWithMongo._mongoClientPromise = client.connect();
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri);
+  client = new MongoClient(uri, options);
   clientPromise = client.connect();
 }
 
