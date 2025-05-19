@@ -97,8 +97,19 @@ export default function CreatePortalPage() {
         toast({
           title: "Analyzing Website",
           description:
-            "We're analyzing your restaurant website to extract information and menu items...",
+            "We're analyzing your restaurant website to extract information and menu items. This may take a moment...",
+          duration: 10000, // Show for 10 seconds
         });
+
+        // Show a second toast with more details
+        setTimeout(() => {
+          toast({
+            title: "AI Analysis in Progress",
+            description:
+              "Our AI is analyzing your website and generating menu items. Please be patient as this process may take up to 30 seconds.",
+            duration: 20000, // Show for 20 seconds
+          });
+        }, 3000);
 
         // Analyze the restaurant website
         const analysis = await analyzeRestaurantWebsite(websiteUrl);
@@ -119,8 +130,10 @@ export default function CreatePortalPage() {
         if (analysis.menuItems && analysis.menuItems.length > 0) {
           menuItems = analysis.menuItems;
           toast({
-            title: "Menu Items Found",
-            description: `We found ${menuItems.length} menu items on your website.`,
+            title: "Menu Items Generated",
+            description: `We've generated ${menuItems.length} menu items based on your website analysis.`,
+            variant: "success",
+            duration: 5000,
           });
         }
       } else {

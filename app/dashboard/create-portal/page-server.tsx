@@ -22,11 +22,21 @@ export async function generateColorScheme(websiteUrl?: string) {
   }
 
   try {
-    // Call the simplified restaurant analysis API
+    // Determine which API to use based on environment
+    const isProduction = process.env.NODE_ENV === "production";
+    const apiEndpoint = isProduction
+      ? "/api/analyze-restaurant-fallback"
+      : "/api/analyze-restaurant-simple";
+
+    console.log(
+      `Using API endpoint: ${apiEndpoint} (production: ${isProduction})`
+    );
+
+    // Call the appropriate restaurant analysis API
     const response = await fetch(
       `${
         process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/api/analyze-restaurant-simple`,
+      }${apiEndpoint}`,
       {
         method: "POST",
         headers: {
@@ -123,11 +133,21 @@ export async function analyzeRestaurantWebsite(websiteUrl: string) {
   }
 
   try {
-    // Call the simplified restaurant analysis API
+    // Determine which API to use based on environment
+    const isProduction = process.env.NODE_ENV === "production";
+    const apiEndpoint = isProduction
+      ? "/api/analyze-restaurant-fallback"
+      : "/api/analyze-restaurant-simple";
+
+    console.log(
+      `Using API endpoint: ${apiEndpoint} (production: ${isProduction})`
+    );
+
+    // Call the appropriate restaurant analysis API
     const response = await fetch(
       `${
         process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }/api/analyze-restaurant-simple`,
+      }${apiEndpoint}`,
       {
         method: "POST",
         headers: {
