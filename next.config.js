@@ -41,6 +41,15 @@ const nextConfig = {
       stream: require.resolve("stream-browserify"),
       buffer: require.resolve("buffer"),
     };
+
+    // Exclude puppeteer from the build
+    config.externals = [
+      ...(config.externals || []),
+      "puppeteer",
+      "puppeteer-extra",
+      "puppeteer-extra-plugin-stealth",
+    ];
+
     return config;
   },
 };
