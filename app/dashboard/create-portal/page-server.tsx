@@ -15,6 +15,87 @@ export async function createPortalData(
   }
 }
 
+// Simplified function to generate a color scheme and menu items
+async function generateRestaurantData(
+  restaurantName: string,
+  websiteUrl?: string
+) {
+  try {
+    // Call our simplified API
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      }/api/generate-restaurant-portal-simple`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ restaurantName, websiteUrl }),
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) {
+      console.error(
+        "Failed to generate restaurant data:",
+        await response.text()
+      );
+      return {
+        colors: await getDefaultColorScheme(),
+        description: "",
+        menuItems: [],
+      };
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      console.error("Failed to generate restaurant data:", result.error);
+      return {
+        colors: await getDefaultColorScheme(),
+        description: "",
+        menuItems: [],
+      };
+    }
+
+    const data = result.data;
+
+    // Extract colors
+    const colors = {
+      primary: data.colors?.primary || "#3B82F6",
+      secondary: data.colors?.secondary || "#1E40AF",
+      accent: data.colors?.accent || "#DBEAFE",
+    };
+
+    // Extract menu items
+    const menuItems = (data.menuItems || []).map((item) => ({
+      name: item.name,
+      description: item.description || "",
+      price:
+        typeof item.price === "number"
+          ? item.price
+          : parseFloat(String(item.price).replace(/[^0-9.]/g, "") || "0"),
+      category: item.category || "Menu Item",
+      available: true,
+      tags: [],
+    }));
+
+    return {
+      colors,
+      description: data.description || "",
+      menuItems,
+    };
+  } catch (error) {
+    console.error("Error generating restaurant data:", error);
+    return {
+      colors: await getDefaultColorScheme(),
+      description: "",
+      menuItems: [],
+    };
+  }
+}
+
 export async function generateColorScheme(websiteUrl?: string) {
   // If no website URL is provided, return a default color scheme
   if (!websiteUrl) {
@@ -22,102 +103,42 @@ export async function generateColorScheme(websiteUrl?: string) {
   }
 
   try {
-    // Determine which API to use based on environment
-    const isProduction = process.env.NODE_ENV === "production";
-    const apiEndpoint = isProduction
-      ? "/api/analyze-restaurant-fallback"
-      : "/api/analyze-restaurant-simple";
+    // Extract restaurant name from URL
+    let restaurantName = "";
+    try {
+      const urlObj = new URL(websiteUrl);
+      const hostname = urlObj.hostname;
+      // Remove www. and .com/.net/etc
+      restaurantName = hostname
+        .replace(/^www\./i, "")
+        .replace(
+          /\.(com|net|org|co|io|restaurant|food|menu|cafe|bar|pub|bistro).*$/i,
+          ""
+        )
+        .split(".")
+        .join(" ")
+        .split("-")
+        .join(" ")
+        .split("_")
+        .join(" ");
 
-    console.log(
-      `Using API endpoint: ${apiEndpoint} (production: ${isProduction})`
-    );
-
-    // Call the appropriate restaurant analysis API
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }${apiEndpoint}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: websiteUrl }),
-        cache: "no-store",
-      }
-    );
-
-    if (!response.ok) {
-      console.error(
-        "Failed to analyze restaurant website:",
-        await response.text()
-      );
-      return await getDefaultColorScheme();
+      // Capitalize first letter of each word
+      restaurantName = restaurantName
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    } catch (error) {
+      console.error("Error extracting restaurant name from URL:", error);
+      restaurantName = "Restaurant";
     }
 
-    const data = await response.json();
+    // Generate restaurant data
+    const data = await generateRestaurantData(restaurantName, websiteUrl);
 
-    if (!data.success) {
-      console.error("Restaurant analysis failed:", data.error);
-      return await getDefaultColorScheme();
-    }
-
-    // Extract color scheme from the analysis
-    if (data.analysis?.themeRecommendations) {
-      const { primaryColor, secondaryColor, accentColor } =
-        data.analysis.themeRecommendations;
-
-      // Return the color scheme
-      return {
-        primary: primaryColor || "#3B82F6", // Default to blue if not provided
-        secondary: secondaryColor || "#1E40AF", // Default to darker blue if not provided
-        accent: accentColor || "#DBEAFE", // Default to light blue if not provided
-      };
-    }
-
-    // Check for well-known restaurant chains as fallback
-    const lowerUrl = websiteUrl.toLowerCase();
-
-    // KFC - Red and white color scheme
-    if (lowerUrl.includes("kfc") || lowerUrl.includes("kentucky")) {
-      return {
-        primary: "#E4002B", // KFC red
-        secondary: "#A50022", // Darker red
-        accent: "#F8F8F8", // Off-white
-      };
-    }
-
-    // McDonald's - Red and yellow color scheme
-    if (lowerUrl.includes("mcdonalds") || lowerUrl.includes("mcdonald")) {
-      return {
-        primary: "#FFC72C", // McDonald's yellow
-        secondary: "#DA291C", // McDonald's red
-        accent: "#FFFFFF", // White
-      };
-    }
-
-    // Pizza Hut - Red color scheme
-    if (lowerUrl.includes("pizzahut") || lowerUrl.includes("pizza hut")) {
-      return {
-        primary: "#ED1C24", // Pizza Hut red
-        secondary: "#AA1A20", // Darker red
-        accent: "#FFFFFF", // White
-      };
-    }
-
-    // Starbucks - Green color scheme
-    if (lowerUrl.includes("starbucks")) {
-      return {
-        primary: "#006241", // Starbucks green
-        secondary: "#004A31", // Darker green
-        accent: "#F2F0EB", // Off-white
-      };
-    }
-
-    // Default to random color scheme
-    return await getDefaultColorScheme();
+    // Return the color scheme
+    return data.colors;
   } catch (error) {
-    console.error("Error analyzing restaurant website:", error);
+    console.error("Error generating color scheme:", error);
     return await getDefaultColorScheme();
   }
 }
@@ -133,94 +154,42 @@ export async function analyzeRestaurantWebsite(websiteUrl: string) {
   }
 
   try {
-    // Determine which API to use based on environment
-    const isProduction = process.env.NODE_ENV === "production";
-    const apiEndpoint = isProduction
-      ? "/api/analyze-restaurant-fallback"
-      : "/api/analyze-restaurant-simple";
+    // Extract restaurant name from URL
+    let restaurantName = "";
+    try {
+      const urlObj = new URL(websiteUrl);
+      const hostname = urlObj.hostname;
+      // Remove www. and .com/.net/etc
+      restaurantName = hostname
+        .replace(/^www\./i, "")
+        .replace(
+          /\.(com|net|org|co|io|restaurant|food|menu|cafe|bar|pub|bistro).*$/i,
+          ""
+        )
+        .split(".")
+        .join(" ")
+        .split("-")
+        .join(" ")
+        .split("_")
+        .join(" ");
 
-    console.log(
-      `Using API endpoint: ${apiEndpoint} (production: ${isProduction})`
-    );
-
-    // Call the appropriate restaurant analysis API
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      }${apiEndpoint}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: websiteUrl }),
-        cache: "no-store",
-      }
-    );
-
-    if (!response.ok) {
-      console.error(
-        "Failed to analyze restaurant website:",
-        await response.text()
-      );
-      return {
-        restaurantName: "",
-        description: "",
-        menuItems: [],
-      };
+      // Capitalize first letter of each word
+      restaurantName = restaurantName
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    } catch (error) {
+      console.error("Error extracting restaurant name from URL:", error);
+      restaurantName = "Restaurant";
     }
 
-    const data = await response.json();
-
-    if (!data.success) {
-      console.error("Restaurant analysis failed:", data.error);
-      return {
-        restaurantName: "",
-        description: "",
-        menuItems: [],
-      };
-    }
-
-    // Extract restaurant information from the analysis
-    const restaurantName = data.analysis.restaurantName || "";
-    const description = data.analysis.description || "";
-
-    // Extract menu items from the analysis
-    let menuItems = [];
-
-    // First try to use the suggested menu items from the AI
-    if (
-      data.analysis.suggestedMenuItems &&
-      data.analysis.suggestedMenuItems.length > 0
-    ) {
-      menuItems = data.analysis.suggestedMenuItems.map((item) => ({
-        name: item.name,
-        description: item.description || "",
-        price:
-          typeof item.price === "number"
-            ? item.price
-            : parseFloat(item.price?.replace(/[^0-9.]/g, "") || "0"),
-        category: item.category || "Menu Item",
-        available: true,
-        tags: [],
-      }));
-    }
-    // If no suggested items, use the scraped menu items
-    else if (data.menuItems && data.menuItems.length > 0) {
-      menuItems = data.menuItems.map((item) => ({
-        name: item.name,
-        description: item.description || "",
-        price: parseFloat(item.price?.replace(/[^0-9.]/g, "") || "0"),
-        category: item.category || "Menu Item",
-        available: true,
-        tags: [],
-      }));
-    }
+    // Generate restaurant data
+    const data = await generateRestaurantData(restaurantName, websiteUrl);
 
     return {
       restaurantName,
-      description,
-      menuItems,
+      description: data.description,
+      menuItems: data.menuItems,
     };
   } catch (error) {
     console.error("Error analyzing restaurant website:", error);
