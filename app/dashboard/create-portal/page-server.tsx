@@ -1,7 +1,11 @@
 // @ts-nocheck
 "use server";
 
-import { createNewPortal, getDefaultColorScheme } from "@/app/actions";
+import {
+  createNewPortal,
+  getDefaultColorScheme,
+  generateRestaurantDataWithGemini,
+} from "@/app/actions";
 import { Portal } from "@/models/Portal";
 
 export async function createPortalData(
@@ -29,15 +33,39 @@ async function generateRestaurantData(
 
     // Use a try-catch block specifically for the fetch operation
     try {
-      // Call our simplified API - use relative URL to avoid localhost issues in production
-      const response = await fetch(`/api/generate-restaurant-portal-simple`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ restaurantName, websiteUrl }),
-        cache: "no-store",
-      });
+      // Use absolute URL with the correct base URL
+      let baseUrl;
+
+      // Try different environment variables that might be available in Vercel
+      if (process.env.VERCEL_URL) {
+        baseUrl = `https://${process.env.VERCEL_URL}`;
+      } else if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+        baseUrl = `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
+      } else if (process.env.NEXT_PUBLIC_APP_URL) {
+        baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+      } else if (process.env.APP_URL) {
+        baseUrl = process.env.APP_URL;
+      } else {
+        // Fallback to hardcoded production URL or localhost
+        baseUrl =
+          process.env.NODE_ENV === "production"
+            ? "https://dinetap-ai.vercel.app"
+            : "http://localhost:3000";
+      }
+
+      console.log(`Using base URL: ${baseUrl}`);
+
+      const response = await fetch(
+        `${baseUrl}/api/generate-restaurant-portal-simple`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ restaurantName, websiteUrl }),
+          cache: "no-store",
+        }
+      );
 
       if (!response.ok) {
         console.error(
@@ -88,8 +116,51 @@ async function generateRestaurantData(
     } catch (fetchError) {
       console.error("Fetch error in generateRestaurantData:", fetchError);
 
-      // Generate fallback data directly without API
-      console.log("Generating fallback data without API");
+      // Try using Gemini API directly
+      console.log("Trying to generate data directly with Gemini API");
+      try {
+        const geminiResult = await generateRestaurantDataWithGemini(
+          restaurantName,
+          websiteUrl
+        );
+
+        if (geminiResult.success && geminiResult.data) {
+          console.log(
+            `Successfully generated data with Gemini for ${restaurantName}`
+          );
+
+          // Extract colors
+          const colors = {
+            primary: geminiResult.data.colors?.primary || "#3B82F6",
+            secondary: geminiResult.data.colors?.secondary || "#1E40AF",
+            accent: geminiResult.data.colors?.accent || "#DBEAFE",
+          };
+
+          // Extract menu items
+          const menuItems = (geminiResult.data.menuItems || []).map((item) => ({
+            name: item.name,
+            description: item.description || "",
+            price:
+              typeof item.price === "number"
+                ? item.price
+                : parseFloat(String(item.price).replace(/[^0-9.]/g, "") || "0"),
+            category: item.category || "Menu Item",
+            available: true,
+            tags: [],
+          }));
+
+          return {
+            colors,
+            description: geminiResult.data.description || "",
+            menuItems,
+          };
+        }
+      } catch (geminiError) {
+        console.error("Error using Gemini directly:", geminiError);
+      }
+
+      // If Gemini also fails, use hardcoded fallback data
+      console.log("Using hardcoded fallback data");
 
       // Generate a description based on restaurant name
       const description = `${restaurantName} offers a delightful dining experience with a variety of delicious options in a comfortable atmosphere.`;

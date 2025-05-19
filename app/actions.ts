@@ -63,3 +63,9 @@ export async function removeMenuItem(id: string) {
 export async function getDefaultColorScheme() {
   return generateDefaultColorScheme();
 }
+
+// Import the Gemini direct function
+import { generateRestaurantDataWithGemini } from "@/lib/gemini-direct";
+
+// Export the Gemini function as a server action
+export { generateRestaurantDataWithGemini };
