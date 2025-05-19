@@ -42,7 +42,7 @@ export function ChatAssistant({
     {
       role: "assistant",
       content:
-        "Hello! I'm your restaurant assistant. How can I help you today?",
+        "Hello! I'm Dinetap AI, your restaurant assistant. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
@@ -109,7 +109,7 @@ export function ChatAssistant({
         typingMessage,
       ]);
 
-      // Prepare messages for API - filter out error messages
+      // Prepare messages for API - filter out error messages and typing indicators
       const messagesToSend = messages
         .filter((msg) => !msg.isError && !msg.isTyping)
         .concat(
@@ -118,51 +118,74 @@ export function ChatAssistant({
             : [{ role: "user", content: messageToSend, timestamp: new Date() }]
         );
 
+      // Create a clean version of messages for the API
+      const cleanMessages = messagesToSend.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
+      // Set up request with timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout
 
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: messagesToSend,
-          portalId,
-          menuItems,
-        }),
-        signal: controller.signal,
-      });
+      console.log("Sending chat request with messages:", cleanMessages.length);
 
-      clearTimeout(timeoutId);
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: cleanMessages,
+            portalId,
+            menuItems,
+          }),
+          signal: controller.signal,
+        });
 
-      // Remove typing indicator
-      setMessages((prev) => prev.filter((m) => !m.isTyping));
+        clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server error: ${response.status}`);
+        // Remove typing indicator
+        setMessages((prev) => prev.filter((m) => !m.isTyping));
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `Server error: ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Check if we got a valid response
+        if (
+          !data.response ||
+          typeof data.response !== "string" ||
+          data.response.trim() === ""
+        ) {
+          throw new Error("Received an empty response from the server");
+        }
+
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: data.response,
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [
+          ...prev.filter((m) => !m.isTyping),
+          assistantMessage,
+        ]);
+
+        setErrorCount(0); // Reset error count on success
+      } catch (fetchError) {
+        throw fetchError; // Re-throw to be handled by the outer catch
       }
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      const assistantMessage: Message = {
-        role: "assistant",
-        content:
-          data.response ||
-          "I'm here to help with your questions about our restaurant and menu.",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [
-        ...prev.filter((m) => !m.isTyping),
-        assistantMessage,
-      ]);
-      setErrorCount(0); // Reset error count on success
     } catch (error) {
       console.error("Error sending message:", error);
 
@@ -178,6 +201,12 @@ export function ChatAssistant({
       if (error.name === "AbortError") {
         errorMessage =
           "The request took too long to process. Please try a shorter message or try again.";
+      } else if (error.message?.includes("API key")) {
+        errorMessage =
+          "There's an issue with the AI service. Please try again later.";
+      } else if (error.message?.includes("safety")) {
+        errorMessage =
+          "I couldn't process that request due to content safety policies. Please try a different question.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -256,7 +285,7 @@ export function ChatAssistant({
       {isChatOpen && !isChatDisabled && (
         <Card className="fixed bottom-20 right-4 w-80 md:w-96 shadow-xl z-50 border-2">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Restaurant Assistant</CardTitle>
+            <CardTitle className="text-lg">Dinetap AI Assistant</CardTitle>
           </CardHeader>
 
           <CardContent className="p-0">
@@ -271,7 +300,7 @@ export function ChatAssistant({
                   {message.role === "assistant" && (
                     <Avatar className="h-8 w-8 mr-2 shrink-0">
                       <div className="bg-primary text-white flex items-center justify-center h-full w-full rounded-full text-xs">
-                        AI
+                        DT
                       </div>
                     </Avatar>
                   )}
