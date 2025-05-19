@@ -1371,12 +1371,31 @@ export default function PortalPage() {
           {selectedItem && (
             <>
               <div className="relative aspect-video w-full overflow-hidden">
-                <img
-                  src={selectedItem.image}
-                  alt={selectedItem.name}
-                  className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                {selectedItem.image ? (
+                  <>
+                    <img
+                      src={selectedItem.image}
+                      alt={selectedItem.name}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={getFallbackImage(
+                        selectedItem.category,
+                        selectedItem.name
+                      )}
+                      alt={selectedItem.name}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                    <div className="absolute top-3 left-3 bg-amber-500/90 rounded-full p-1.5 shadow-md">
+                      <AlertCircle className="h-4 w-4 text-white" />
+                    </div>
+                  </>
+                )}
                 <DialogClose className="absolute right-2 top-2 rounded-full bg-white/90 p-2 text-gray-700 backdrop-blur-sm transition-colors hover:text-gray-900">
                   <X className="h-4 w-4" />
                 </DialogClose>
