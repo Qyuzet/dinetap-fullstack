@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import MenuItemCard from "@/components/portal/menu-item-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -367,12 +368,16 @@ export default function PortalPage() {
                                   }20`,
                                 }}
                               >
-                                {item.image && (
+                                {item.image ? (
                                   <img
                                     src={item.image}
                                     alt={item.name}
                                     className="h-full w-full object-cover"
                                   />
+                                ) : (
+                                  <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+                                    <AlertCircle className="h-6 w-6 text-amber-500" />
+                                  </div>
                                 )}
                               </div>
                               <div className="pt-1">
@@ -536,6 +541,26 @@ export default function PortalPage() {
             {restaurant.description}
           </p>
 
+          {/* Placeholder image notice */}
+          <div className="mt-4 rounded-lg border-l-4 border-amber-400 bg-amber-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-amber-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-amber-800">
+                  Placeholder Images
+                </h3>
+                <div className="mt-2 text-sm text-amber-700">
+                  <p>
+                    Some menu items are using placeholder images. Restaurant
+                    staff can update these in the dashboard.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-6 relative max-w-md">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -634,12 +659,40 @@ export default function PortalPage() {
                 }}
               >
                 <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                  {item.image ? (
+                    <>
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        src={`/images/fallback/${
+                          item.category?.toLowerCase().includes("chicken")
+                            ? "chicken"
+                            : item.category?.toLowerCase().includes("beef")
+                            ? "beef"
+                            : item.category?.toLowerCase().includes("rice")
+                            ? "rice"
+                            : item.category?.toLowerCase().includes("soup")
+                            ? "soup"
+                            : item.category?.toLowerCase().includes("appetizer")
+                            ? "appetizer"
+                            : "default-food"
+                        }.jpg`}
+                        alt={item.name}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                      <div className="absolute top-3 left-3 bg-amber-500/90 rounded-full p-1.5 shadow-md">
+                        <AlertCircle className="h-4 w-4 text-white" />
+                      </div>
+                    </>
+                  )}
                   {item.available === false && (
                     <div className="absolute left-3 top-3 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-lg bg-red-500">
                       <div className="flex items-center">
