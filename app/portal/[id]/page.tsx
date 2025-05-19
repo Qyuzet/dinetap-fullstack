@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import MenuItemCard from "@/components/portal/menu-item-card";
+import { getFallbackImage } from "@/lib/fallback-images";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -375,9 +376,11 @@ export default function PortalPage() {
                                     className="h-full w-full object-cover"
                                   />
                                 ) : (
-                                  <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-                                    <AlertCircle className="h-6 w-6 text-amber-500" />
-                                  </div>
+                                  <img
+                                    src={getFallbackImage("", item.name)}
+                                    alt={item.name}
+                                    className="h-full w-full object-cover"
+                                  />
                                 )}
                               </div>
                               <div className="pt-1">
@@ -671,19 +674,7 @@ export default function PortalPage() {
                   ) : (
                     <>
                       <img
-                        src={`/images/fallback/${
-                          item.category?.toLowerCase().includes("chicken")
-                            ? "chicken"
-                            : item.category?.toLowerCase().includes("beef")
-                            ? "beef"
-                            : item.category?.toLowerCase().includes("rice")
-                            ? "rice"
-                            : item.category?.toLowerCase().includes("soup")
-                            ? "soup"
-                            : item.category?.toLowerCase().includes("appetizer")
-                            ? "appetizer"
-                            : "default-food"
-                        }.jpg`}
+                        src={getFallbackImage(item.category, item.name)}
                         alt={item.name}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />
@@ -904,9 +895,15 @@ export default function PortalPage() {
                                       }20`,
                                     }}
                                   >
-                                    {item.image && (
+                                    {item.image ? (
                                       <img
                                         src={item.image}
+                                        alt={item.name}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    ) : (
+                                      <img
+                                        src={getFallbackImage("", item.name)}
                                         alt={item.name}
                                         className="h-full w-full object-cover"
                                       />
