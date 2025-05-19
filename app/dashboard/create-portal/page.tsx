@@ -32,7 +32,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Globe, FileText, Sparkles, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { createPortalData, generateColorScheme } from "./page-server";
+import {
+  createPortalData,
+  generateColorScheme,
+  analyzeRestaurantWebsite,
+} from "./page-server";
 import { saveMenuItems } from "./menu-actions";
 import { MenuItem } from "@/models/Portal";
 
@@ -76,14 +80,53 @@ export default function CreatePortalPage() {
     setIsAnalyzing(true);
 
     try {
-      // Generate a color scheme based on the website URL if available
+      // Get the website URL if available
       const websiteUrl =
         activeTab === "website" ? values.websiteUrl : undefined;
+
+      // Generate a color scheme based on the website URL
       const colors = await generateColorScheme(websiteUrl);
 
-      // No AI menu generation - using empty menu items
+      // Initialize variables for restaurant data
+      let restaurantName = values.name;
+      let description = values.description || "";
       let menuItems: Omit<MenuItem, "id">[] = [];
-      console.log("No menu items generated - AI feature removed");
+
+      // If website URL is provided, analyze the website
+      if (websiteUrl) {
+        toast({
+          title: "Analyzing Website",
+          description:
+            "We're analyzing your restaurant website to extract information and menu items...",
+        });
+
+        // Analyze the restaurant website
+        const analysis = await analyzeRestaurantWebsite(websiteUrl);
+
+        // Update restaurant name if not already set
+        if (!restaurantName && analysis.restaurantName) {
+          restaurantName = analysis.restaurantName;
+          form.setValue("name", restaurantName);
+        }
+
+        // Update description if not already set
+        if (!description && analysis.description) {
+          description = analysis.description;
+          form.setValue("description", description);
+        }
+
+        // Use menu items from analysis
+        if (analysis.menuItems && analysis.menuItems.length > 0) {
+          menuItems = analysis.menuItems;
+          toast({
+            title: "Menu Items Found",
+            description: `We found ${menuItems.length} menu items on your website.`,
+          });
+        }
+      } else {
+        // No website URL provided, using empty menu items
+        console.log("No website URL provided - using empty menu items");
+      }
 
       // Create the portal
       const newPortal = await createPortalData({
@@ -229,8 +272,12 @@ export default function CreatePortalPage() {
                       Website Analysis
                     </AlertTitle>
                     <AlertDescription className="text-indigo-700">
-                      Enter your restaurant website URL to create a customized
-                      ordering portal with AI-powered design and branding.
+                      Enter your restaurant website URL that contains your menu
+                      to create a customized ordering portal with AI-powered
+                      design, branding, and automatic menu creation. For best
+                      results, use a URL that leads directly to a page with menu
+                      items. Our AI will analyze your website to extract all the
+                      necessary information.
                     </AlertDescription>
                   </Alert>
 
@@ -250,8 +297,11 @@ export default function CreatePortalPage() {
                           />
                         </FormControl>
                         <FormDescription className="mt-2 text-indigo-600/70">
-                          We'll analyze your website to extract your
-                          restaurant's branding and design elements.
+                          Enter your restaurant website URL that contains your
+                          menu. Make sure the URL leads directly to a page with
+                          menu items. We'll analyze it to extract your
+                          restaurant's branding, design elements, and menu items
+                          automatically.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

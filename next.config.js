@@ -5,8 +5,7 @@ const nextConfig = {
   },
   // Disable static generation for pages that use client-side features
   output: "standalone",
-  // Configure which pages should not be statically generated
-  unstable_excludeDefaultCatchAllRoutes: true,
+  // This option has been removed in newer Next.js versions
   images: {
     unoptimized: false,
     remotePatterns: [
