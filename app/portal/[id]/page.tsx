@@ -526,7 +526,7 @@ export default function PortalPage() {
 
       <main className="container mx-auto px-4 py-8">
         <div
-          className="mb-10 rounded-2xl bg-white p-6 shadow-lg"
+          className="mb-6 sm:mb-10 rounded-2xl bg-white p-4 sm:p-6 shadow-lg"
           style={{
             background: `linear-gradient(135deg, white, ${
               restaurant.colors?.accent || "#DBEAFE"
@@ -545,16 +545,16 @@ export default function PortalPage() {
           </p>
 
           {/* Placeholder image notice */}
-          <div className="mt-4 rounded-lg border-l-4 border-amber-400 bg-amber-50 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
+          <div className="mt-4 rounded-lg border-l-4 border-amber-400 bg-amber-50 p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center">
+              <div className="flex-shrink-0 mb-2 sm:mb-0">
                 <AlertCircle className="h-5 w-5 text-amber-400" />
               </div>
-              <div className="ml-3">
+              <div className="sm:ml-3">
                 <h3 className="text-sm font-medium text-amber-800">
                   Placeholder Images
                 </h3>
-                <div className="mt-2 text-sm text-amber-700">
+                <div className="mt-1 text-sm text-amber-700">
                   <p>
                     Some menu items are using placeholder images. Restaurant
                     staff can update these in the dashboard.
@@ -585,7 +585,7 @@ export default function PortalPage() {
           <h2 className="mb-4 text-xl font-semibold text-gray-700">
             Categories
           </h2>
-          <div className="flex space-x-3">
+          <div className="flex flex-nowrap space-x-3 pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             {categories.length > 0 &&
               categories.map((category) => (
                 <Button
@@ -622,7 +622,7 @@ export default function PortalPage() {
           </div>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 md:gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {filteredItems.length === 0 ? (
             <div className="col-span-full flex h-60 items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50">
               <div className="text-center">
@@ -747,7 +747,7 @@ export default function PortalPage() {
                   </div>
                 </CardContent>
                 <CardFooter className="pb-5 pt-2">
-                  <div className="flex w-full items-center justify-between">
+                  <div className="flex w-full flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center text-sm text-gray-500">
                       <Clock className="mr-1.5 h-4 w-4" />
                       Ready in 15-20 min
@@ -757,7 +757,7 @@ export default function PortalPage() {
                         e.stopPropagation(); // Prevent card click
                         addToCart(item);
                       }}
-                      className="rounded-full px-5 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5"
+                      className="rounded-full px-4 sm:px-5 text-sm sm:text-base shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5"
                       style={{
                         background:
                           item.available === false
@@ -790,8 +790,8 @@ export default function PortalPage() {
               }20`,
             }}
           >
-            <div className="container mx-auto">
-              <div className="flex items-center justify-between">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center">
                   <div
                     className="mr-4 flex h-14 w-14 items-center justify-center rounded-full shadow-md"
@@ -821,7 +821,7 @@ export default function PortalPage() {
                   <SheetTrigger asChild>
                     <Button
                       id="checkout-trigger"
-                      className="rounded-full px-8 py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
+                      className="w-full sm:w-auto rounded-full px-6 sm:px-8 py-4 sm:py-6 text-lg font-medium shadow-lg transition-all hover:shadow-xl hover:-translate-y-1"
                       style={{
                         background: `linear-gradient(135deg, ${
                           restaurant.colors?.primary || "#3B82F6"
@@ -884,7 +884,7 @@ export default function PortalPage() {
                             {cart.map((item) => (
                               <div
                                 key={item.id}
-                                className="flex items-start justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all hover:shadow-md"
+                                className="flex flex-col sm:flex-row items-start justify-between rounded-xl border border-gray-100 bg-white p-3 shadow-sm transition-all hover:shadow-md gap-3"
                               >
                                 <div className="flex items-start">
                                   <div
@@ -925,7 +925,7 @@ export default function PortalPage() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-2 self-end sm:self-center mt-2 sm:mt-0">
                                   <Button
                                     variant="outline"
                                     size="icon"
@@ -1112,7 +1112,7 @@ export default function PortalPage() {
                                     required
                                   />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                   <div className="grid gap-2">
                                     <Label
                                       htmlFor="email"
@@ -1367,7 +1367,7 @@ export default function PortalPage() {
 
       {/* Item Details Dialog */}
       <Dialog open={showItemDetails} onOpenChange={setShowItemDetails}>
-        <DialogContent className="sm:max-w-md rounded-xl p-0 overflow-hidden">
+        <DialogContent className="w-[95vw] max-w-full sm:max-w-md rounded-xl p-0 overflow-hidden">
           {selectedItem && (
             <>
               <div className="relative aspect-video w-full overflow-hidden">
@@ -1442,7 +1442,7 @@ export default function PortalPage() {
                   </div>
                 )}
 
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock className="mr-1.5 h-4 w-4" />
                     Ready in 15-20 min
@@ -1452,7 +1452,7 @@ export default function PortalPage() {
                       addToCart(selectedItem);
                       setShowItemDetails(false);
                     }}
-                    className="rounded-full px-5 py-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5"
+                    className="w-full sm:w-auto rounded-full px-5 py-2 shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5"
                     style={{
                       background:
                         selectedItem.available === false
