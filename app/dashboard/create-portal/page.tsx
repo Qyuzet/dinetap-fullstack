@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AnalysisVisualizer from "@/components/dashboard/analysis-visualizer";
 import { ArrowLeft, Globe, FileText, Sparkles, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
@@ -63,6 +64,7 @@ export default function CreatePortalPage() {
   const [activeTab, setActiveTab] = useState("website");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
 
   // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -113,6 +115,20 @@ export default function CreatePortalPage() {
 
         // Analyze the restaurant website
         const analysis = await analyzeRestaurantWebsite(websiteUrl);
+
+        // Store the analysis result for visualization
+        setAnalysisResult({
+          analysis: {
+            restaurantName: analysis.restaurantName,
+            description: analysis.description,
+            themeRecommendations: {
+              primaryColor: colors.primary,
+              secondaryColor: colors.secondary,
+              accentColor: colors.accent,
+            },
+          },
+          menuItems: analysis.menuItems || [],
+        });
 
         // Update restaurant name if not already set
         if (!restaurantName && analysis.restaurantName) {
@@ -320,6 +336,19 @@ export default function CreatePortalPage() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Analysis Visualizer */}
+                  {(isAnalyzing || analysisResult) && (
+                    <AnalysisVisualizer
+                      websiteUrl={form.getValues("websiteUrl") || ""}
+                      isAnalyzing={isAnalyzing}
+                      analysisResult={analysisResult}
+                      onComplete={() => {
+                        // This will be called when the visualization is complete
+                        console.log("Analysis visualization complete");
+                      }}
+                    />
+                  )}
 
                   <FormField
                     control={form.control}
