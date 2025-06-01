@@ -1,32 +1,22 @@
 {
   "version": 2,
-  "name": "dinetap-ai",
-  "builds": [
-    {
-      "src": "frontend/package.json",
-      "use": "@vercel/next"
-    },
-    {
-      "src": "backend/src/server.js",
-      "use": "@vercel/node"
+  "name": "dinetap-fullstack",
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/.next",
+  "installCommand": "npm run install:all",
+  "framework": "nextjs",
+  "functions": {
+    "frontend/app/api/**/*.ts": {
+      "maxDuration": 30
     }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/src/server.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/$1"
-    }
-  ],
+  },
   "env": {
     "NODE_ENV": "production"
   },
-  "functions": {
-    "backend/src/server.js": {
-      "maxDuration": 30
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
     }
-  }
+  ]
 }
