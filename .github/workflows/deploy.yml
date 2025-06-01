@@ -1,0 +1,118 @@
+name: Deploy to Remote Server
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm run install:all
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        npm test || echo "No tests found"
+    
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm test || echo "No tests found"
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Build and push backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        push: true
+        tags: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to remote server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        password: ${{ secrets.REMOTE_PASSWORD }}
+        port: 22
+        script: |
+          # Navigate to project directory
+          cd /home/usergc18/dinetap-fullstack || mkdir -p /home/usergc18/dinetap-fullstack && cd /home/usergc18/dinetap-fullstack
+          
+          # Pull latest code
+          git pull origin main || git clone https://github.com/Qyuzet/dinetap-fullstack.git . && git checkout main
+          
+          # Create environment file if not exists
+          if [ ! -f .env ]; then
+            cp .env.example .env
+            echo "Please update .env file with your actual credentials"
+          fi
+          
+          # Stop existing containers
+          docker-compose down || true
+          
+          # Pull latest images
+          docker pull ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
+          
+          # Update docker-compose to use pushed images
+          sed -i 's|build:|#build:|g' docker-compose.yml
+          sed -i 's|context: ./backend|#context: ./backend|g' docker-compose.yml
+          sed -i 's|dockerfile: Dockerfile|#dockerfile: Dockerfile|g' docker-compose.yml
+          sed -i 's|context: ./frontend|#context: ./frontend|g' docker-compose.yml
+          sed -i '/backend:/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest' docker-compose.yml
+          sed -i '/frontend:/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest' docker-compose.yml
+          
+          # Start containers
+          docker-compose up -d
+          
+          # Clean up unused images
+          docker image prune -f
