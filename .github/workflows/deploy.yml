@@ -37,19 +37,19 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-    
+
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    
+
     - name: Build and push backend image
       uses: docker/build-push-action@v5
       with:
@@ -58,13 +58,19 @@ jobs:
         tags: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
+
     - name: Build and push frontend image
       uses: docker/build-push-action@v5
       with:
         context: ./frontend
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
+        build-args: |
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
@@ -90,11 +96,14 @@ jobs:
           # Pull latest code
           git pull origin main || git clone https://github.com/Qyuzet/dinetap-fullstack.git . && git checkout main
           
-          # Create environment file if not exists
-          if [ ! -f .env ]; then
-            cp .env.example .env
-            echo "Please update .env file with your actual credentials"
-          fi
+          # Create environment file with actual values
+          cp .env.example .env
+
+          # Update .env with actual secrets
+          sed -i "s|your_google_client_id.apps.googleusercontent.com|${{ secrets.GOOGLE_CLIENT_ID }}|g" .env
+          sed -i "s|your_google_client_secret|${{ secrets.GOOGLE_CLIENT_SECRET }}|g" .env
+          sed -i "s|your_gemini_api_key_here|${{ secrets.GEMINI_API_KEY }}|g" .env
+          sed -i "s|your_nextauth_secret_minimum_32_characters|${{ secrets.NEXTAUTH_SECRET }}|g" .env
           
           # Stop existing containers
           docker-compose down || true
