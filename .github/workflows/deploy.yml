@@ -58,6 +58,8 @@ jobs:
         run: |
           docker compose up -d
         env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
