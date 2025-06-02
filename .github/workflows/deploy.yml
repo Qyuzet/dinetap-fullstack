@@ -26,12 +26,7 @@ jobs:
 
       - name: Build and Push Frontend Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest ./frontend \
-            --build-arg MONGODB_URI=${{ secrets.MONGODB_URI }} \
-            --build-arg GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-            --build-arg GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }} \
-            --build-arg GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
-            --build-arg NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest ./frontend --build-arg MONGODB_URI="${{ secrets.MONGODB_URI }}" --build-arg GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" --build-arg GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" --build-arg GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}" --build-arg NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}"
           docker push ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
 
   continuous-deployment:
