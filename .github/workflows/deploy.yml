@@ -52,6 +52,8 @@ jobs:
       - name: Stop and Remove Old Containers
         run: |
           docker compose down || true
+          docker container stop $(docker container ls -aq) || true
+          docker container rm $(docker container ls -aq) || true
           docker system prune -f
 
       - name: Run New Containers
