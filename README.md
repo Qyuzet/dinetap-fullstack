@@ -1,6 +1,6 @@
 # Dinetap AI
 
-AI-Powered Restaurant Ordering Platform - Full-Stack Architecture
+AI-Powered Restaurant Ordering Platform - Full-Stack MERN Architecture with Docker Support
 
 ## 🏗️ Architecture
 
