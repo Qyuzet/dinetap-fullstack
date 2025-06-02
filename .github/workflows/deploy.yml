@@ -1,137 +1,64 @@
-name: Deploy to Remote Server
+name: Dinetap CI/CD
 
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - "README.md"
   pull_request:
     branches: [ main ]
 
 jobs:
-  test:
+  continuous-integration:
     runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: |
-        npm run install:all
-    
-    - name: Run backend tests
-      run: |
-        cd backend
-        npm test || echo "No tests found"
-    
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm test || echo "No tests found"
-
-  build-and-push:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and Push Backend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest ./backend
+          docker push ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
 
-    - name: Build and push backend image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./backend
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Build and Push Frontend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
 
-    - name: Build and push frontend image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
-        build-args: |
-          MONGODB_URI=${{ secrets.MONGODB_URI }}
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+  continuous-deployment:
+    needs: continuous-integration
+    runs-on: self-hosted
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Test SSH Connection
-      run: |
-        echo "Testing SSH connection to server..."
-        timeout 30 nc -zv ${{ secrets.REMOTE_HOST }} 22 || echo "SSH port 22 not accessible"
+      - name: Setup Docker Rootless Environment
+        run: |
+          echo "Setting up Docker rootless env..."
+          echo "export PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
+          echo "export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock" >> $GITHUB_ENV
 
-    - name: Deploy to remote server
-      uses: appleboy/ssh-action@v1.0.0
-      continue-on-error: true
-      with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        password: ${{ secrets.REMOTE_PASSWORD }}
-        port: 22
-        timeout: 60s
-        command_timeout: 300s
-        script: |
-          # Navigate to project directory
-          cd /home/usergc18/dinetap-fullstack || mkdir -p /home/usergc18/dinetap-fullstack && cd /home/usergc18/dinetap-fullstack
-          
-          # Pull latest code
-          git pull origin main || git clone https://github.com/Qyuzet/dinetap-fullstack.git . && git checkout main
-          
-          # Create environment file with actual values
-          cp .env.example .env
+      - name: Pull Latest Backend Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
 
-          # Update .env with actual secrets
-          sed -i "s|your_google_client_id.apps.googleusercontent.com|${{ secrets.GOOGLE_CLIENT_ID }}|g" .env
-          sed -i "s|your_google_client_secret|${{ secrets.GOOGLE_CLIENT_SECRET }}|g" .env
-          sed -i "s|your_gemini_api_key_here|${{ secrets.GEMINI_API_KEY }}|g" .env
-          sed -i "s|your_nextauth_secret_minimum_32_characters|${{ secrets.NEXTAUTH_SECRET }}|g" .env
-          
-          # Stop existing containers
-          docker-compose down || true
-          
-          # Pull latest images
-          docker pull ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest
-          docker pull ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
-          
-          # Update docker-compose to use pushed images
-          sed -i 's|build:|#build:|g' docker-compose.yml
-          sed -i 's|context: ./backend|#context: ./backend|g' docker-compose.yml
-          sed -i 's|dockerfile: Dockerfile|#dockerfile: Dockerfile|g' docker-compose.yml
-          sed -i 's|context: ./frontend|#context: ./frontend|g' docker-compose.yml
+      - name: Pull Latest Frontend Image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest
 
-          # Add image references for backend and frontend
-          sed -i '/container_name: dinetap-backend/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest' docker-compose.yml
-          sed -i '/container_name: dinetap-frontend/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest' docker-compose.yml
-          
-          # Start containers
-          docker-compose up -d
-          
-          # Clean up unused images
-          docker image prune -f
+      - name: Stop and Remove Old Containers
+        run: |
+          docker compose down || true
+          docker system prune -f
+
+      - name: Run New Containers
+        run: |
+          docker compose up -d
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
