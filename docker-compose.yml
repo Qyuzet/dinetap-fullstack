@@ -1,4 +1,21 @@
 services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: dinetap-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: dinetap
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - dinetap-network
+
   # Backend Service
   backend:
     image: ${DOCKER_USERNAME}/dinetap-backend:latest
