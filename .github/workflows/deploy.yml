@@ -78,17 +78,25 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v4
-    
+
+    - name: Test SSH Connection
+      run: |
+        echo "Testing SSH connection to server..."
+        timeout 30 nc -zv ${{ secrets.REMOTE_HOST }} 22 || echo "SSH port 22 not accessible"
+
     - name: Deploy to remote server
       uses: appleboy/ssh-action@v1.0.0
+      continue-on-error: true
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         password: ${{ secrets.REMOTE_PASSWORD }}
         port: 22
+        timeout: 60s
+        command_timeout: 300s
         script: |
           # Navigate to project directory
           cd /home/usergc18/dinetap-fullstack || mkdir -p /home/usergc18/dinetap-fullstack && cd /home/usergc18/dinetap-fullstack

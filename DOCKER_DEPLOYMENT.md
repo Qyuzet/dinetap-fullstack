@@ -17,6 +17,20 @@ npm run docker:down
 
 ### Production Deployment
 
+#### Option A: Manual Deployment (Recommended)
+
+If GitHub Actions cannot connect to the university server, use the manual deployment script:
+
+```bash
+# Make script executable
+chmod +x deploy-manual.sh
+
+# Run deployment
+./deploy-manual.sh
+```
+
+#### Option B: Direct SSH Deployment
+
 #### 1. Server Setup (SSH to your server)
 ```bash
 ssh usergc18@10.25.143.17
