@@ -2,20 +2,52 @@
 
 AI-Powered Restaurant Ordering Platform - Full-Stack MERN Architecture with Docker Support
 
-## 🏗️ Architecture
+## Architecture
 
 This is a full-stack application with separate frontend and backend services:
 
-- **Frontend**: Next.js 14 with TypeScript (Port 3000)
-- **Backend**: Node.js Express API (Port 5000)
-- **Database**: MongoDB
-- **AI**: Google Gemini integration
+### Frontend (Next.js)
+- **Framework**: Next.js 14 with TypeScript and App Router
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Authentication**: NextAuth.js with Google OAuth integration
+- **State Management**: React hooks and context
+- **AI Integration**: Google Gemini API for restaurant generation and customer support
+- **Development Port**: 3000
+- **Production Port**: 3035
 
-## 🚀 Quick Deploy to Vercel
+### Backend (Express.js)
+- **Framework**: Node.js with Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT tokens and session management
+- **File Upload**: Multer for image handling
+- **Security**: Helmet, CORS, rate limiting
+- **AI Services**: Google Gemini API integration
+- **Development Port**: 5000
+- **Production Port**: 3036
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/dinetap-ai)
+### Database (MongoDB)
+- **Database**: MongoDB for data persistence
+- **Collections**: Portals, MenuItems, Orders, Users
+- **Development**: Local MongoDB instance
+- **Production**: Containerized MongoDB (Port 27018)
 
-## 🏃‍♂️ Quick Start (Development)
+## Deployment Strategy
+
+### Docker Containerization
+The application is deployed using Docker containers with the following setup:
+- **Frontend Container**: Next.js application with production build
+- **Backend Container**: Express.js API with Node.js runtime
+- **Database Container**: MongoDB with persistent volume storage
+- **Orchestration**: Docker Compose for multi-container management
+
+### CI/CD Pipeline
+- **Repository**: GitHub with automated workflows
+- **CI/CD**: GitHub Actions with self-hosted runner
+- **Registry**: Docker Hub for container image storage
+- **Deployment**: Automated deployment to university VPS server
+- **Environment**: Production environment with secure environment variables
+
+## Quick Start (Development)
 
 ### Prerequisites
 - Node.js 18+
@@ -91,8 +123,9 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
-## 🎯 Features
+## Features
 
+### Core Functionality
 - **AI-Powered Restaurant Generation**: Create restaurants with Gemini AI
 - **Digital Ordering System**: Customer-facing ordering interface
 - **Restaurant Management**: Complete dashboard for restaurant owners
@@ -102,7 +135,15 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - **Menu Management**: Full CRUD operations for menu items
 - **Order Tracking**: Complete order lifecycle management
 
-## 🛠️ Development Scripts
+### Technical Features
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Authentication**: Secure Google OAuth integration
+- **File Upload**: Image handling for menu items and restaurant logos
+- **API Security**: Rate limiting, CORS, and input validation
+- **Error Handling**: Comprehensive error management and logging
+- **Health Monitoring**: Container health checks and monitoring
+
+## Development Scripts
 
 ### Available Commands
 ```bash
@@ -117,46 +158,75 @@ npm run lint             # Check code quality
 npm run test             # Run tests
 ```
 
-## 🚀 Deployment
+## Production Deployment
 
-### Vercel Deployment (Recommended)
-1. **Push to GitHub**
-2. **Connect to Vercel**
-3. **Set Environment Variables** in Vercel dashboard:
+### Docker Deployment (Current)
+The application is deployed using Docker containers on a university VPS server:
+
+1. **Automated CI/CD Pipeline**:
+   - Push code to GitHub main branch
+   - GitHub Actions triggers automated build
+   - Docker images built and pushed to Docker Hub
+   - Self-hosted runner deploys to university server
+
+2. **Container Configuration**:
    ```bash
-   # Required for both frontend and backend
-   MONGODB_URI=your-mongodb-connection-string
+   # Frontend: https://e2425-wads-l4ccg4-client.csbihub.id:3035
+   # Backend: https://e2425-wads-l4ccg4-client.csbihub.id:3036
+   # MongoDB: Internal container network (Port 27018)
+   ```
+
+3. **Environment Variables** (managed via GitHub Secrets):
+   ```bash
+   MONGODB_URI=mongodb://admin:password123@mongodb:27017/dinetap?authSource=admin
    GEMINI_API_KEY=your-gemini-api-key
    NEXTAUTH_SECRET=your-nextauth-secret
    GOOGLE_CLIENT_ID=your-google-client-id
    GOOGLE_CLIENT_SECRET=your-google-client-secret
+   DOCKER_USERNAME=your-docker-hub-username
    ```
-4. **Deploy** - Vercel will automatically build and deploy both frontend and backend
 
-### Manual Deployment
-- **Backend**: Railway, Heroku, or any Node.js hosting
-- **Frontend**: Vercel, Netlify, or any Next.js hosting
-- Update environment variables accordingly
+### Alternative Deployment Options
+- **Vercel**: For serverless deployment (frontend + API routes)
+- **Railway/Heroku**: For traditional hosting
+- **AWS/GCP**: For cloud deployment with managed services
 
-## 📖 API Documentation
+## API Documentation
 
 The backend provides RESTful APIs for:
-- **Portals**: `/api/portals`
-- **Menu Items**: `/api/menu-items`
-- **Orders**: `/api/orders`
-- **AI Services**: `/api/ai`
 
-Visit http://localhost:5000/health for API status.
+### Core Endpoints
+- **Portals**: `/api/portals` - Restaurant portal management
+- **Menu Items**: `/api/menu-items` - Menu item CRUD operations
+- **Orders**: `/api/orders` - Order management and tracking
+- **AI Services**: `/api/ai` - Gemini AI integration for restaurant generation
 
-## 🤝 Contributing
+### Health Check
+- **Development**: http://localhost:5000/health
+- **Production**: https://e2425-wads-l4ccg4-client.csbihub.id:3036/health
+
+### Authentication
+- **Google OAuth**: Integrated via NextAuth.js
+- **JWT Tokens**: For API authentication
+- **Session Management**: Secure session handling
+
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Make your changes
-4. Test both frontend and backend
-5. Submit a pull request
-# CI/CD Pipeline Test - Mon Jun  2 07:55:48 PM WIB 2025
-# CI/CD Pipeline Test - Mon Jun  2 07:59:46 PM WIB 2025
-# CI/CD Test - Mon Jun  2 08:06:15 PM WIB 2025
+4. Test both frontend and backend thoroughly
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
 
-# CI/CD Pipeline Test - 20250602-201411
+## License
+
+This project is part of a university final project for BINUS University.
+
+## Contact
+
+- **Developer**: Riki Awal Syahputra
+- **Email**: riqyuzet@gmail.com
+- **GitHub**: [@Qyuzet](https://github.com/Qyuzet)
+- **University**: BINUS University
