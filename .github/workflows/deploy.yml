@@ -117,8 +117,10 @@ jobs:
           sed -i 's|context: ./backend|#context: ./backend|g' docker-compose.yml
           sed -i 's|dockerfile: Dockerfile|#dockerfile: Dockerfile|g' docker-compose.yml
           sed -i 's|context: ./frontend|#context: ./frontend|g' docker-compose.yml
-          sed -i '/backend:/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest' docker-compose.yml
-          sed -i '/frontend:/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest' docker-compose.yml
+
+          # Add image references for backend and frontend
+          sed -i '/container_name: dinetap-backend/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-backend:latest' docker-compose.yml
+          sed -i '/container_name: dinetap-frontend/a\    image: ${{ secrets.DOCKER_USERNAME }}/dinetap-frontend:latest' docker-compose.yml
           
           # Start containers
           docker-compose up -d
