@@ -64,7 +64,7 @@ services:
       - NEXT_PUBLIC_API_URL=http://backend:5000/api
       - NEXT_PUBLIC_BACKEND_HEALTH_URL=http://backend:5000/health
       - NEXTAUTH_SECRET=a8d9e7f6c5b4a3d2e1f0c9b8a7d6e5f4c3b2a1d0e9f8c7b6a5d4e3f2c1b0a9d8
-      - NEXTAUTH_URL=https://e2425-wads-l4ccg4-client.csbihub.id:3035
+      - NEXTAUTH_URL=http://10.25.143.17:3035
       - MONGODB_URI=mongodb://admin:password123@mongodb:27017/dinetap?authSource=admin
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
