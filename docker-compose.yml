@@ -43,7 +43,7 @@ services:
       - "3035:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://e2425-wads-l4ccg4-server.csbihub.id/api
+      - NEXT_PUBLIC_API_URL=http://10.25.143.17:3036/api
       - NEXT_PUBLIC_BACKEND_HEALTH_URL=http://backend:5000/health
       - NEXTAUTH_SECRET=a8d9e7f6c5b4a3d2e1f0c9b8a7d6e5f4c3b2a1d0e9f8c7b6a5d4e3f2c1b0a9d8
       - NEXTAUTH_URL=https://e2425-wads-l4ccg4-client.csbihub.id
