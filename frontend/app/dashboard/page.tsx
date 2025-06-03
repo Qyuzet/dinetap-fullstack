@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { getUserPortalsData, deletePortalData } from "./page-server";
+import { portalApi } from "@/lib/api-client";
 import type { Portal } from "@/models/Portal";
 import {
   Card,
@@ -56,7 +56,7 @@ export default function DashboardPage() {
         try {
           // In a real app, we would use the actual user ID
           // For now, we're using a hardcoded ID since we're simulating the backend
-          const userPortals = await getUserPortalsData("user_1");
+          const userPortals = await portalApi.getUserPortals("user_1");
           setPortals(userPortals);
         } catch (error) {
           console.error("Error fetching portals:", error);
@@ -300,9 +300,8 @@ export default function DashboardPage() {
                               className="bg-red-600 hover:bg-red-700"
                               onClick={async () => {
                                 try {
-                                  const success = await deletePortalData(
-                                    portal.id
-                                  );
+                                  await portalApi.deletePortal(portal.id);
+                                  const success = true;
                                   if (success) {
                                     setPortals(
                                       portals.filter((p) => p.id !== portal.id)
