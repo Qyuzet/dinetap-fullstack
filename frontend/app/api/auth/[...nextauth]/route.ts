@@ -44,7 +44,7 @@ const handler = NextAuth({
   providers,
   adapter: MongoDBAdapter(clientPromise) as Adapter,
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   pages: {
     signIn: "/login",
