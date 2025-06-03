@@ -61,7 +61,9 @@ jobs:
 
       - name: Run New Containers
         run: |
-          docker compose up -d
+          docker compose down || true
+          docker rm -f $(docker ps -aq --filter "name=dinetap") || true
+          docker compose up -d --force-recreate
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
