@@ -9,14 +9,16 @@ if (!uri) {
   process.exit(1);
 }
 
-// MongoDB connection options optimized for backend server
+// MongoDB connection options optimized for rate limiting
 const options = {
-  serverSelectionTimeoutMS: 10000, // 10 seconds
-  connectTimeoutMS: 10000,
-  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  maxPoolSize: 10, // Maintain up to 10 socket connections
-  minPoolSize: 2, // Minimum number of connections
-  maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+  serverSelectionTimeoutMS: 15000, // 15 seconds
+  connectTimeoutMS: 15000,
+  socketTimeoutMS: 60000, // Close sockets after 60 seconds of inactivity
+  maxPoolSize: 5, // Reduced to 5 socket connections to avoid rate limiting
+  minPoolSize: 1, // Minimum number of connections
+  maxIdleTimeMS: 60000, // Close connections after 60 seconds of inactivity
+  retryWrites: true, // Enable retryable writes
+  retryReads: true, // Enable retryable reads
   // Note: bufferMaxEntries and bufferCommands are Mongoose options, not MongoDB driver options
 };
 
@@ -44,10 +46,19 @@ const connectToDatabase = async () => {
   }
 };
 
-// Get database instance
-const getDatabase = async () => {
-  const client = await connectToDatabase();
-  return client.db();
+// Get database instance with retry logic
+const getDatabase = async (retries = 3) => {
+  try {
+    const client = await connectToDatabase();
+    return client.db();
+  } catch (error) {
+    if (retries > 0 && (error.message.includes('too many requests') || error.message.includes('rate limit'))) {
+      console.log(`Rate limited, retrying in 2 seconds... (${retries} retries left)`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return getDatabase(retries - 1);
+    }
+    throw error;
+  }
 };
 
 // Graceful shutdown

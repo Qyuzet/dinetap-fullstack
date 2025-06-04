@@ -3,10 +3,10 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
-const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const { connectToDatabase, closeConnection } = require('./config/database');
+const { apiLimiter, dbLimiter, aiLimiter } = require('./middleware/rateLimiter');
 
 // Import routes
 const portalRoutes = require('./routes/portals');
@@ -22,17 +22,12 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.'
-  }
-});
-
-app.use('/api/', limiter);
+// Apply rate limiting
+app.use('/api/', apiLimiter); // General API rate limiting
+app.use('/api/portals', dbLimiter); // Database operations
+app.use('/api/menu', dbLimiter); // Database operations
+app.use('/api/orders', dbLimiter); // Database operations
+app.use('/api/ai', aiLimiter); // AI operations (most restrictive)
 
 // CORS configuration
 const corsOptions = {

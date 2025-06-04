@@ -3,6 +3,7 @@ const router = express.Router();
 const portalService = require('../services/portalService');
 const menuService = require('../services/menuService');
 const { body, param, query, validationResult } = require('express-validator');
+const { executeWithRetry, throttle } = require('../utils/dbUtils');
 
 // Validation middleware
 const handleValidationErrors = (req, res, next) => {
@@ -26,17 +27,21 @@ router.get('/', [
 ], async (req, res) => {
   try {
     const { userId, status, search } = req.query;
-    
-    let portals;
-    if (search) {
-      portals = await portalService.searchPortals(search, userId);
-    } else if (status) {
-      portals = await portalService.getPortalsByStatus(status);
-      // Filter by userId
-      portals = portals.filter(portal => portal.userId === userId);
-    } else {
-      portals = await portalService.getUserPortals(userId);
-    }
+
+    // Add throttling to reduce database load
+    await throttle(50);
+
+    const portals = await executeWithRetry(async () => {
+      if (search) {
+        return await portalService.searchPortals(search, userId);
+      } else if (status) {
+        const allPortals = await portalService.getPortalsByStatus(status);
+        // Filter by userId
+        return allPortals.filter(portal => portal.userId === userId);
+      } else {
+        return await portalService.getUserPortals(userId);
+      }
+    });
 
     res.json({
       success: true,
@@ -44,6 +49,16 @@ router.get('/', [
     });
   } catch (error) {
     console.error('Error fetching portals:', error);
+
+    // Check if it's a rate limiting error
+    if (error.message && error.message.includes('too many requests')) {
+      return res.status(429).json({
+        success: false,
+        message: 'Too many requests to database. Please try again in a moment.',
+        retryAfter: 30
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Failed to fetch portals',
