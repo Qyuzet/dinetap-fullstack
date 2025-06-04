@@ -8,7 +8,7 @@ const nextConfig = {
   
   // Image optimization configuration
   images: {
-    unoptimized: false,
+    unoptimized: process.env.NODE_ENV === 'production' ? true : false,
     remotePatterns: [
       {
         protocol: "https",
@@ -29,6 +29,22 @@ const nextConfig = {
         protocol: "http",
         hostname: "localhost",
         port: "5000",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "e2425-wads-l4ccg4-server.csbihub.id",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "e2425-wads-l4ccg4-server.csbihub.id",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "10.25.143.17",
+        port: "3036",
         pathname: "/**",
       },
     ],
@@ -60,6 +76,21 @@ const nextConfig = {
     ];
   },
   
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "img-src 'self' data: blob: https: http:; object-src 'none';",
+          },
+        ],
+      },
+    ];
+  },
+
   // Environment variables
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,

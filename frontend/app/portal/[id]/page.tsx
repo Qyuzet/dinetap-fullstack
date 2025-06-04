@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -369,19 +370,14 @@ export default function PortalPage() {
                                   }20`,
                                 }}
                               >
-                                {item.image ? (
-                                  <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <img
-                                    src={getFallbackImage("", item.name)}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover"
-                                  />
-                                )}
+                                <Image
+                                  src={item.image || getFallbackImage("", item.name)}
+                                  alt={item.name}
+                                  width={64}
+                                  height={64}
+                                  className="h-full w-full object-cover"
+                                  unoptimized
+                                />
                               </div>
                               <div className="pt-1">
                                 <h3 className="font-bold text-gray-800">
@@ -662,28 +658,21 @@ export default function PortalPage() {
                 }}
               >
                 <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
-                  {item.image ? (
-                    <>
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src={getFallbackImage(item.category, item.name)}
-                        alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                  <>
+                    <Image
+                      src={item.image || getFallbackImage(item.category, item.name)}
+                      alt={item.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                    {!item.image && (
                       <div className="absolute top-3 left-3 bg-amber-500/90 rounded-full p-1.5 shadow-md">
                         <AlertCircle className="h-4 w-4 text-white" />
                       </div>
-                    </>
-                  )}
+                    )}
+                  </>
                   {item.available === false && (
                     <div className="absolute left-3 top-3 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-lg bg-red-500">
                       <div className="flex items-center">
@@ -895,19 +884,14 @@ export default function PortalPage() {
                                       }20`,
                                     }}
                                   >
-                                    {item.image ? (
-                                      <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    ) : (
-                                      <img
-                                        src={getFallbackImage("", item.name)}
-                                        alt={item.name}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    )}
+                                    <Image
+                                      src={item.image || getFallbackImage("", item.name)}
+                                      alt={item.name}
+                                      width={64}
+                                      height={64}
+                                      className="h-full w-full object-cover"
+                                      unoptimized
+                                    />
                                   </div>
                                   <div className="pt-1">
                                     <h3 className="font-bold text-gray-800">
@@ -1371,31 +1355,21 @@ export default function PortalPage() {
           {selectedItem && (
             <>
               <div className="relative aspect-video w-full overflow-hidden">
-                {selectedItem.image ? (
-                  <>
-                    <img
-                      src={selectedItem.image}
-                      alt={selectedItem.name}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
-                  </>
-                ) : (
-                  <>
-                    <img
-                      src={getFallbackImage(
-                        selectedItem.category,
-                        selectedItem.name
-                      )}
-                      alt={selectedItem.name}
-                      className="h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                <>
+                  <Image
+                    src={selectedItem.image || getFallbackImage(selectedItem.category, selectedItem.name)}
+                    alt={selectedItem.name}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60" />
+                  {!selectedItem.image && (
                     <div className="absolute top-3 left-3 bg-amber-500/90 rounded-full p-1.5 shadow-md">
                       <AlertCircle className="h-4 w-4 text-white" />
                     </div>
-                  </>
-                )}
+                  )}
+                </>
                 <DialogClose className="absolute right-2 top-2 rounded-full bg-white/90 p-2 text-gray-700 backdrop-blur-sm transition-colors hover:text-gray-900">
                   <X className="h-4 w-4" />
                 </DialogClose>
