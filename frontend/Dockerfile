@@ -18,7 +18,7 @@ ENV GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 ENV GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
 ENV NEXTAUTH_URL=https://e2425-wads-l4ccg4-client.csbihub.id
-ENV NEXT_PUBLIC_API_URL=http://10.25.143.17:3036/api
+ENV NEXT_PUBLIC_API_URL=https://e2425-wads-l4ccg4-server.csbihub.id/api
 
 # Copy package files
 COPY package*.json ./
