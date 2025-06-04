@@ -52,11 +52,13 @@ export default function DashboardPage() {
   // Fetch user portals
   useEffect(() => {
     const fetchPortals = async () => {
-      if (status === "authenticated" && session?.user) {
+      if (status === "authenticated" && session?.user?.email) {
         try {
-          // In a real app, we would use the actual user ID
-          // For now, we're using a hardcoded ID since we're simulating the backend
-          const userPortals = await portalApi.getUserPortals("user_1");
+          // Use the user's email as the user ID for now
+          // This ensures each user sees only their own portals
+          const userId = session.user.email;
+          console.log("Fetching portals for user:", userId);
+          const userPortals = await portalApi.getUserPortals(userId);
           setPortals(userPortals);
         } catch (error) {
           console.error("Error fetching portals:", error);

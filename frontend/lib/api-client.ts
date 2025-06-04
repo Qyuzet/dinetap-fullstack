@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 
-// API Configuration
-const API_BASE_URL = 'http://10.25.143.17:3036/api';
+// API Configuration - Use environment variable with fallback
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
 const httpClient: AxiosInstance = axios.create({

@@ -1,18 +1,18 @@
 // @ts-nocheck
 import { NextResponse } from "next/server";
-// This is an API route, so we don't need 'use server' here
+import { getServerSession } from "next-auth/next";
 import clientPromise from "@/lib/mongodb";
 import { v4 as uuidv4 } from "uuid";
 
-// Sample data for seeding the database
-const samplePortals = [
+// Sample data for seeding the database - function to generate with user ID
+const generateSamplePortals = (userId: string) => [
   {
     id: uuidv4(),
     name: "Solaria Restaurant",
     description: "Indonesian cuisine restaurant with a modern twist",
     createdAt: new Date(),
     status: "active",
-    userId: "user_1",
+    userId: userId,
     colors: {
       primary: "#3B82F6",
       secondary: "#1E40AF",
@@ -25,7 +25,7 @@ const samplePortals = [
     description: "Authentic Indian cuisine with a variety of spice levels",
     createdAt: new Date(),
     status: "active",
-    userId: "user_1",
+    userId: userId,
     colors: {
       primary: "#EF4444",
       secondary: "#B91C1C",
@@ -103,16 +103,30 @@ function generateMenuItems(portalId: string) {
   return menuItems;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get the current user session
+    const session = await getServerSession();
+
+    if (!session?.user?.email) {
+      return NextResponse.json(
+        { success: false, error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.email;
     const client = await clientPromise;
     const db = client.db();
 
-    // Clear existing data
-    await db.collection("portals").deleteMany({});
+    // Clear existing data for this user only
+    await db.collection("portals").deleteMany({ userId });
     await db.collection("menuItems").deleteMany({});
 
-    console.log("Cleared existing data");
+    console.log("Cleared existing data for user:", userId);
+
+    // Generate sample portals for this user
+    const samplePortals = generateSamplePortals(userId);
 
     // Insert portals
     await db.collection("portals").insertMany(samplePortals);

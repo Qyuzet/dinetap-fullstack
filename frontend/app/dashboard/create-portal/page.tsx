@@ -166,7 +166,7 @@ export default function CreatePortalPage() {
             ? `Created from website: ${values.websiteUrl}`
             : "Created manually"),
         status: "active",
-        userId: "user_1", // In a real app, this would be the actual user ID
+        userId: session?.user?.email || "anonymous", // Use actual user email as ID
         colors,
       });
 
