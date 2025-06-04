@@ -47,6 +47,7 @@ export function MenuItemCard({ item, index }: MenuItemCardProps) {
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            unoptimized
           />
           {item.spiceLevel && (
             <div className="absolute right-2 top-2">
@@ -107,6 +108,7 @@ export function MenuItemCard({ item, index }: MenuItemCardProps) {
                     alt={item.name}
                     fill
                     className="object-cover"
+                    unoptimized
                   />
                 </div>
                 

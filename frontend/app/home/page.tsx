@@ -100,6 +100,7 @@ export default function Home() {
                       width={32}
                       height={32}
                       className="h-full w-full object-cover"
+                      unoptimized
                     />
                   </div>
                 ))}
@@ -623,6 +624,7 @@ export default function Home() {
                           width={48}
                           height={48}
                           className="h-full w-full object-cover"
+                          unoptimized
                         />
                       </div>
                       <div>
@@ -726,6 +728,7 @@ export default function Home() {
                         width={48}
                         height={48}
                         className="h-full w-full object-cover"
+                        unoptimized
                       />
                     </div>
                     <div>

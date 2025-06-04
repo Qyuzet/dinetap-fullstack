@@ -43,6 +43,7 @@ export default function MenuItemPage({ params }: { params: { id: string } }) {
                 priority
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
               />
               {item.popular && (
                 <div className="absolute left-4 top-4">
