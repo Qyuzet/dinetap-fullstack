@@ -1,232 +1,324 @@
-# Dinetap AI
+# Dinetap AI - Restaurant Portal Generation Platform
 
-AI-Powered Restaurant Ordering Platform - Full-Stack MERN Architecture with Docker Support
+A comprehensive AI-powered platform for creating customized restaurant ordering portals with intelligent design generation, menu management, and seamless customer experience.
 
-## Architecture
+## Overview
 
-This is a full-stack application with separate frontend and backend services:
+Dinetap AI revolutionizes restaurant digital presence by automatically generating branded ordering portals through AI-powered website analysis or manual configuration. The platform creates complete restaurant ecosystems with customer ordering interfaces, cashier management systems, and kitchen order tracking.
 
-### Frontend (Next.js)
-- **Framework**: Next.js 14 with TypeScript and App Router
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Authentication**: NextAuth.js with Google OAuth integration
-- **State Management**: React hooks and context
-- **AI Integration**: Google Gemini API for restaurant generation and customer support
-- **Development Port**: 3000
-- **Production Port**: 3035
+### Key Capabilities
 
-### Backend (Express.js)
-- **Framework**: Node.js with Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JWT tokens and session management
-- **File Upload**: Multer for image handling
-- **Security**: Helmet, CORS, rate limiting
-- **AI Services**: Google Gemini API integration
-- **Development Port**: 5000
-- **Production Port**: 3036
-
-### Database (MongoDB)
-- **Database**: MongoDB for data persistence
-- **Collections**: Portals, MenuItems, Orders, Users
-- **Development**: Local MongoDB instance
-- **Production**: Containerized MongoDB (Port 27018)
-
-## Deployment Strategy
-
-### Docker Containerization
-The application is deployed using Docker containers with the following setup:
-- **Frontend Container**: Next.js application with production build
-- **Backend Container**: Express.js API with Node.js runtime
-- **Database Container**: MongoDB with persistent volume storage
-- **Orchestration**: Docker Compose for multi-container management
-
-### CI/CD Pipeline
-- **Repository**: GitHub with automated workflows
-- **CI/CD**: GitHub Actions with self-hosted runner
-- **Registry**: Docker Hub for container image storage
-- **Deployment**: Automated deployment to university VPS server
-- **Environment**: Production environment with secure environment variables
-
-## Quick Start (Development)
-
-### Prerequisites
-- Node.js 18+
-- MongoDB (local or cloud)
-- Google Gemini API key
-
-### 1. Clone Repository
-```bash
-git clone <repository-url>
-cd dinetap-ai
-```
-
-### 2. Install All Dependencies
-```bash
-npm run install:all
-```
-
-### 3. Setup Environment Variables
-```bash
-# Copy environment templates
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-
-# Edit with your configuration
-```
-
-### 4. Start Development
-```bash
-npm run dev
-```
-
-### 5. Access Application
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
-- **API Health**: http://localhost:5000/health
-
-## 📁 Project Structure
-
-```
-dinetap-a/
-├── backend/          # Express.js API server
-│   ├── src/
-│   │   ├── routes/   # API endpoints
-│   │   ├── models/   # Database models
-│   │   ├── services/ # Business logic
-│   │   └── utils/    # Utilities
-│   └── package.json
-├── frontend/         # Next.js application
-│   ├── app/          # App router pages
-│   ├── components/   # React components
-│   ├── lib/          # Frontend utilities
-│   └── package.json
-├── start-fullstack.sh # Start both services
-└── stop-fullstack.sh  # Stop both services
-```
-
-## 🔧 Environment Variables
-
-### Backend (.env)
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/dinetap
-GEMINI_API_KEY=your_gemini_api_key
-NODE_ENV=development
-```
-
-### Frontend (.env.local)
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-NEXTAUTH_SECRET=your_nextauth_secret
-NEXTAUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-```
+- **AI-Powered Portal Generation**: Analyze restaurant websites to extract branding, colors, and menu items
+- **Manual Portal Creation**: Custom portal setup with design preferences and manual menu management
+- **Multi-Interface System**: Dedicated views for customers, cashiers, and kitchen staff
+- **Real-time Order Management**: Live order tracking with status updates and notifications
+- **Intelligent Design System**: AI-generated color schemes and responsive layouts
+- **Comprehensive Analytics**: Order patterns, customer preferences, and operational insights
 
 ## Features
 
-### Core Functionality
-- **AI-Powered Restaurant Generation**: Create restaurants with Gemini AI
-- **Digital Ordering System**: Customer-facing ordering interface
-- **Restaurant Management**: Complete dashboard for restaurant owners
-- **Staff Interfaces**: Dedicated views for kitchen, cashier, and admin
-- **Real-time Order Flow**: Orders flow seamlessly between cashier and kitchen
-- **AI Assistant**: Customer support chatbot with menu awareness
-- **Menu Management**: Full CRUD operations for menu items
-- **Order Tracking**: Complete order lifecycle management
+### Core Features
 
-### Technical Features
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Authentication**: Secure Google OAuth integration
-- **File Upload**: Image handling for menu items and restaurant logos
-- **API Security**: Rate limiting, CORS, and input validation
-- **Error Handling**: Comprehensive error management and logging
-- **Health Monitoring**: Container health checks and monitoring
+- **Portal Management**
+  - AI-powered website analysis and portal generation
+  - Manual portal creation with design preferences
+  - Real-time color scheme customization
+  - Responsive design for all devices
 
-## Development Scripts
+- **Menu Management**
+  - AI-generated menu items from website analysis
+  - Manual menu item creation and editing
+  - Category-based organization
+  - Image support with fallback system
+  - Availability and pricing management
 
-### Available Commands
-```bash
-npm run dev              # Start both backend + frontend
-npm run dev:backend      # Start backend only
-npm run dev:frontend     # Start frontend only
-npm run build            # Build for production
-npm run start            # Start production
-npm run install:all      # Install all dependencies
-npm run clean            # Clean all node_modules
-npm run lint             # Check code quality
-npm run test             # Run tests
+- **Order Processing**
+  - Customer ordering interface with cart management
+  - Real-time order status tracking
+  - Payment integration support
+  - Order history and analytics
+
+- **Multi-User Interfaces**
+  - Customer portal for ordering
+  - Cashier interface for order management
+  - Kitchen display for order preparation
+  - Admin dashboard for portal management
+
+### Advanced Features
+
+- **AI Integration**
+  - Google Gemini AI for content generation
+  - Intelligent color scheme extraction
+  - Menu item suggestions and optimization
+  - Chat assistant for customer support
+
+- **Performance Optimization**
+  - Rate limiting and connection pooling
+  - Image optimization and caching
+  - Database query optimization
+  - Retry logic for reliability
+
+- **Security & Reliability**
+  - NextAuth.js authentication
+  - Input validation and sanitization
+  - Error handling and logging
+  - Graceful degradation
+
+## Technology Stack
+
+### Frontend
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: Shadcn/ui
+- **Authentication**: NextAuth.js
+- **State Management**: React Context
+- **Animations**: Framer Motion
+
+### Backend
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: MongoDB Atlas
+- **AI Integration**: Google Generative AI (Gemini)
+- **Authentication**: JWT tokens
+- **Validation**: Express Validator
+- **Rate Limiting**: Express Rate Limit
+
+### Infrastructure
+- **Deployment**: Docker containers
+- **CI/CD**: GitHub Actions
+- **Hosting**: BINUS University servers
+- **Database**: MongoDB Atlas cloud
+- **Image Storage**: Next.js Image optimization
+
+## Architecture
+
+### System Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend      │    │   Database      │
+│   (Next.js)     │◄──►│   (Express)     │◄──►│   (MongoDB)     │
+│                 │    │                 │    │                 │
+│ - Customer UI   │    │ - API Routes    │    │ - Portals       │
+│ - Cashier UI    │    │ - AI Services   │    │ - Menu Items    │
+│ - Kitchen UI    │    │ - Auth System   │    │ - Orders        │
+│ - Admin Panel   │    │ - Rate Limiting │    │ - Users         │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │              ┌─────────────────┐              │
+         └──────────────►│  External APIs  │◄─────────────┘
+                        │                 │
+                        │ - Google Gemini │
+                        │ - NextAuth      │
+                        │ - Image APIs    │
+                        └─────────────────┘
 ```
 
-## Production Deployment
+## Installation
 
-### Docker Deployment (Current)
-The application is deployed using Docker containers on a university VPS server:
+### Prerequisites
 
-1. **Automated CI/CD Pipeline**:
-   - Push code to GitHub main branch
-   - GitHub Actions triggers automated build
-   - Docker images built and pushed to Docker Hub
-   - Self-hosted runner deploys to university server
+- Node.js 18+ 
+- MongoDB Atlas account
+- Google Cloud Platform account (for Gemini AI)
+- Docker and Docker Compose
 
-2. **Container Configuration**:
-   ```bash
-   # Frontend: https://e2425-wads-l4ccg4-client.csbihub.id:3035
-   # Backend: https://e2425-wads-l4ccg4-client.csbihub.id:3036
-   # MongoDB: Internal container network (Port 27018)
-   ```
+### Local Development Setup
 
-3. **Environment Variables** (managed via GitHub Secrets):
-   ```bash
-   MONGODB_URI=mongodb://admin:password123@mongodb:27017/dinetap?authSource=admin
-   GEMINI_API_KEY=your-gemini-api-key
-   NEXTAUTH_SECRET=your-nextauth-secret
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
-   DOCKER_USERNAME=your-docker-hub-username
-   ```
+1. **Clone the repository**
+```bash
+git clone https://github.com/Qyuzet/dinetap-fullstack.git
+cd dinetap-fullstack
+```
 
-### Alternative Deployment Options
-- **Vercel**: For serverless deployment (frontend + API routes)
-- **Railway/Heroku**: For traditional hosting
-- **AWS/GCP**: For cloud deployment with managed services
+2. **Install dependencies**
+```bash
+# Frontend dependencies
+cd frontend
+npm install
+
+# Backend dependencies
+cd ../backend
+npm install
+```
+
+3. **Environment Configuration**
+
+Create `.env` files in both frontend and backend directories:
+
+**Frontend (.env.local)**
+```env
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-nextauth-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_APP_NAME=Dinetap AI
+NEXT_PUBLIC_APP_VERSION=1.0.0
+```
+
+**Backend (.env)**
+```env
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/dinetap
+GEMINI_API_KEY=your-gemini-api-key
+ALLOWED_ORIGINS=http://localhost:3000,https://your-domain.com
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+```
+
+4. **Start development servers**
+```bash
+# Start backend (in backend directory)
+npm run dev
+
+# Start frontend (in frontend directory)
+npm run dev
+```
+
+## Deployment
+
+### Docker Deployment
+
+The application is containerized for easy deployment:
+
+1. **Build and run with Docker Compose**
+```bash
+docker-compose up -d
+```
+
+### BINUS University Server Deployment
+
+The application is deployed on BINUS university servers with:
+
+- **Frontend**: https://e2425-wads-l4ccg4-client.csbihub.id
+- **Backend**: https://e2425-wads-l4ccg4-server.csbihub.id
+- **CI/CD**: GitHub Actions for automated deployment
+- **Monitoring**: Health checks and logging
 
 ## API Documentation
 
-The backend provides RESTful APIs for:
+### Portal Management Endpoints
 
-### Core Endpoints
-- **Portals**: `/api/portals` - Restaurant portal management
-- **Menu Items**: `/api/menu-items` - Menu item CRUD operations
-- **Orders**: `/api/orders` - Order management and tracking
-- **AI Services**: `/api/ai` - Gemini AI integration for restaurant generation
+#### Get User Portals
+```http
+GET /api/portals?userId={userId}
+```
 
-### Health Check
-- **Development**: http://localhost:5000/health
-- **Production**: https://e2425-wads-l4ccg4-client.csbihub.id:3036/health
+#### Create Portal
+```http
+POST /api/portals
+Content-Type: application/json
 
-### Authentication
-- **Google OAuth**: Integrated via NextAuth.js
-- **JWT Tokens**: For API authentication
-- **Session Management**: Secure session handling
+{
+  "name": "Restaurant Name",
+  "description": "Restaurant Description",
+  "userId": "user@example.com",
+  "colors": {
+    "primary": "#3B82F6",
+    "secondary": "#1E40AF",
+    "accent": "#DBEAFE"
+  }
+}
+```
+
+### Menu Management Endpoints
+
+#### Get Menu Items
+```http
+GET /api/portals/{portalId}/menu
+```
+
+#### Create Menu Item
+```http
+POST /api/menu
+Content-Type: application/json
+
+{
+  "name": "Menu Item Name",
+  "description": "Item Description",
+  "price": 12.99,
+  "category": "Main Course",
+  "portalId": "portal-id",
+  "available": true
+}
+```
+
+### AI Endpoints
+
+#### Generate Portal from Website
+```http
+POST /api/ai/generate-portal
+Content-Type: application/json
+
+{
+  "websiteUrl": "https://restaurant-website.com",
+  "restaurantName": "Restaurant Name"
+}
+```
+
+## Usage Guide
+
+### Creating a Portal
+
+#### Method 1: Website Analysis
+1. Navigate to "Create Portal" in the dashboard
+2. Select "Website Analysis" tab
+3. Enter your restaurant's website URL
+4. Provide restaurant name
+5. Click "Create from Website"
+6. AI will analyze the website and generate portal with colors and menu items
+
+#### Method 2: Manual Setup
+1. Navigate to "Create Portal" in the dashboard
+2. Select "Manual Setup" tab
+3. Enter restaurant name and description
+4. Provide design preferences (colors, style, etc.)
+5. Click "Create Portal"
+6. AI will generate colors based on your preferences
+7. Add menu items manually in the portal management interface
+
+### Managing Menu Items
+
+1. **Access Portal Management**: Go to Dashboard > Select Portal > Menu Items tab
+2. **Add Items**: Click "Add Menu Item" and fill in details
+3. **Edit Items**: Click edit icon on existing items
+4. **Categories**: Organize items by categories (Appetizers, Main Courses, etc.)
+5. **Availability**: Toggle item availability on/off
+6. **Images**: Add images or use fallback images
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Test both frontend and backend thoroughly
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+### Development Workflow
+
+1. **Fork the repository**
+2. **Create feature branch**: `git checkout -b feature/new-feature`
+3. **Make changes**: Implement your feature or fix
+4. **Test thoroughly**: Ensure all tests pass
+5. **Commit changes**: `git commit -m "Add new feature"`
+6. **Push to branch**: `git push origin feature/new-feature`
+7. **Create Pull Request**: Submit PR for review
 
 ## License
 
-This project is part of a university final project for BINUS University.
+This project is licensed under the MIT License.
 
-## Contact
+## Support
 
-- **Developer**: Riki Awal Syahputra
+For support and questions:
+
 - **Email**: riqyuzet@gmail.com
-- **GitHub**: [@Qyuzet](https://github.com/Qyuzet)
-- **University**: BINUS University
+- **GitHub Issues**: [Create an issue](https://github.com/Qyuzet/dinetap-fullstack/issues)
+
+## Acknowledgments
+
+- **BINUS University**: For providing deployment infrastructure
+- **Google Gemini AI**: For AI-powered content generation
+- **Next.js Team**: For the excellent React framework
+- **MongoDB**: For reliable database services
+
+---
+
+**Dinetap AI** - Transforming restaurant digital presence through intelligent automation.

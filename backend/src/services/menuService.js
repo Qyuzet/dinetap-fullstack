@@ -1,6 +1,7 @@
 const { getDatabase } = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
 const { mapMenuItemDocument, validateMenuItem } = require('../models/Portal');
+const { executeWithRetry, throttle } = require('../utils/dbUtils');
 
 class MenuService {
   constructor() {
@@ -8,16 +9,28 @@ class MenuService {
   }
 
   async getMenuItems(portalId) {
-    try {
-      const db = await getDatabase();
-      const menuItemsCollection = db.collection(this.collectionName);
+    return await executeWithRetry(async () => {
+      try {
+        console.log('🔍 Fetching menu items for portal:', portalId);
 
-      const menuItems = await menuItemsCollection.find({ portalId }).toArray();
-      return menuItems.map(mapMenuItemDocument);
-    } catch (error) {
-      console.error('Error fetching menu items:', error);
-      throw new Error('Failed to fetch menu items');
-    }
+        // Add throttling to reduce database load
+        await throttle(50);
+
+        const db = await getDatabase();
+        const menuItemsCollection = db.collection(this.collectionName);
+
+        const menuItems = await menuItemsCollection.find({ portalId }).toArray();
+        console.log(`📋 Found ${menuItems.length} menu items for portal ${portalId}`);
+
+        const mappedItems = menuItems.map(mapMenuItemDocument);
+        console.log('✅ Menu items mapped successfully');
+
+        return mappedItems;
+      } catch (error) {
+        console.error('❌ Error fetching menu items:', error);
+        throw new Error('Failed to fetch menu items');
+      }
+    });
   }
 
   async getMenuItemById(id) {
@@ -34,35 +47,47 @@ class MenuService {
   }
 
   async createMenuItem(menuItemData) {
-    try {
-      // Validate menu item data
-      const validationErrors = validateMenuItem(menuItemData);
-      if (validationErrors.length > 0) {
-        throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
+    return await executeWithRetry(async () => {
+      try {
+        console.log('🍽️ Creating menu item:', menuItemData);
+
+        // Validate menu item data
+        const validationErrors = validateMenuItem(menuItemData);
+        if (validationErrors.length > 0) {
+          throw new Error(`Validation failed: ${validationErrors.join(', ')}`);
+        }
+
+        // Add throttling to reduce database load
+        await throttle(100);
+
+        const db = await getDatabase();
+        const menuItemsCollection = db.collection(this.collectionName);
+
+        const newMenuItem = {
+          ...menuItemData,
+          id: uuidv4(),
+          available: menuItemData.available !== undefined ? menuItemData.available : true,
+          tags: menuItemData.tags || [],
+          createdAt: new Date(),
+        };
+
+        console.log('💾 Inserting menu item into database:', newMenuItem);
+        const result = await menuItemsCollection.insertOne(newMenuItem);
+
+        if (!result.insertedId) {
+          throw new Error('Failed to create menu item - no insertedId returned');
+        }
+
+        console.log('✅ Menu item created successfully with ID:', result.insertedId);
+        const createdItem = mapMenuItemDocument(newMenuItem);
+        console.log('📋 Mapped menu item:', createdItem);
+
+        return createdItem;
+      } catch (error) {
+        console.error('❌ Error creating menu item:', error);
+        throw error;
       }
-
-      const db = await getDatabase();
-      const menuItemsCollection = db.collection(this.collectionName);
-
-      const newMenuItem = {
-        ...menuItemData,
-        id: uuidv4(),
-        available: menuItemData.available !== undefined ? menuItemData.available : true,
-        tags: menuItemData.tags || [],
-        createdAt: new Date(),
-      };
-
-      const result = await menuItemsCollection.insertOne(newMenuItem);
-      
-      if (!result.insertedId) {
-        throw new Error('Failed to create menu item');
-      }
-
-      return mapMenuItemDocument(newMenuItem);
-    } catch (error) {
-      console.error('Error creating menu item:', error);
-      throw error;
-    }
+    });
   }
 
   async updateMenuItem(id, menuItemData) {

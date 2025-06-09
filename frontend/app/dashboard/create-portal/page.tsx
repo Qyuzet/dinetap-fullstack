@@ -153,8 +153,53 @@ export default function CreatePortalPage() {
           });
         }
       } else {
-        // No website URL provided, using empty menu items
-        console.log("No website URL provided - using empty menu items");
+        // Manual setup - use design preferences to generate colors and menu
+        console.log("Manual setup - using design preferences");
+
+        if (activeTab === "manual" && (values.description || values.websiteDescription)) {
+          try {
+            // Combine description and design preferences for better AI generation
+            const designPrompt = values.websiteDescription
+              ? `${values.description || ''} Design preferences: ${values.websiteDescription}`
+              : values.description;
+
+            // Use AI to generate colors and menu based on description and preferences
+            const aiResult = await generateRestaurantDataWithGemini(
+              `Create a restaurant portal for "${values.name}". Description: ${designPrompt}. Generate appropriate colors that match the design preferences and create a basic menu structure.`
+            );
+
+            if (aiResult.success && aiResult.data) {
+              // Update colors with AI-generated ones
+              const aiColors = aiResult.data.colors;
+              if (aiColors) {
+                colors.primary = aiColors.primary || colors.primary;
+                colors.secondary = aiColors.secondary || colors.secondary;
+                colors.accent = aiColors.accent || colors.accent;
+              }
+
+              // Update description with AI-enhanced version
+              if (aiResult.data.description) {
+                description = aiResult.data.description;
+              }
+
+              // Use generated menu items if available
+              if (aiResult.data.menuItems && aiResult.data.menuItems.length > 0) {
+                menuItems = aiResult.data.menuItems;
+                toast({
+                  title: "Menu Items Generated",
+                  description: `We've generated ${menuItems.length} menu items based on your description and preferences.`,
+                  variant: "success",
+                  duration: 5000,
+                });
+              }
+            }
+          } catch (error) {
+            console.error("Error generating AI data for manual setup:", error);
+            // Continue with default colors if AI fails
+          }
+        }
+
+        console.log("Manual setup complete - using generated/default data");
       }
 
       // Create the portal
